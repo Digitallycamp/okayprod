@@ -1,0 +1,81 @@
+import { lazy } from 'react';
+
+import DashboardLayout from '../features/admin/DashboardLayout';
+import AuthLayout from '../features/auth/AuthLayout';
+import ForgotPassword from '../features/auth/forgot-password';
+import Register from '../features/auth/register';
+import ResetPasword from '../features/auth/reset-password';
+import Signin from '../features/auth/signin';
+import ProtectedRoutesGuard from './guard/ProtectedRoutesGuard';
+import RoleProtectedGuard from './guard/RoleProtectedGuard';
+import DashboardOverview from '../features/admin/dashboard';
+// const DashboardOverview = lazy(() =>
+// 	import('../features/admin/DashboardLayout')
+// );
+
+const routeObjects = [
+	{
+		element: <AuthLayout />,
+		children: [
+			{
+				path: 'register',
+				element: <Register />,
+			},
+			{
+				path: 'signin',
+				element: <Signin />,
+			},
+			{
+				path: 'forgot-password',
+				element: <ForgotPassword />,
+			},
+			{
+				path: 'reset-password/:token',
+				element: <ResetPasword />,
+			},
+		],
+	},
+
+	{
+		element: (
+			<ProtectedRoutesGuard>
+				<DashboardLayout />
+			</ProtectedRoutesGuard>
+		),
+		path: 'dashboard',
+		errorElement: <p>NOT FOUND</p>,
+		children: [
+			{ index: true, element: <DashboardOverview /> },
+			{
+				path: 'new-order',
+				element: (
+					<RoleProtectedGuard allowedRole={['seller', 'admin']}>
+						<p>New order</p>
+					</RoleProtectedGuard>
+				),
+			},
+			{ path: 'orders', element: <p>Orders</p> },
+			{ path: 'payment-settings', element: <p>Payment settings</p> },
+			{ path: 'sales', element: <p>Sales</p> },
+			{ path: 'transactions', element: <p>Transactions</p> },
+			{
+				path: 'users',
+				element: (
+					<RoleProtectedGuard allowedRole={['admin']}>
+						<p>Users</p>
+					</RoleProtectedGuard>
+				),
+			},
+			{
+				path: 'customers',
+				element: (
+					<RoleProtectedGuard allowedRole={['admin']}>
+						<p>Customers</p>
+					</RoleProtectedGuard>
+				),
+			},
+		],
+	},
+];
+
+export default routeObjects;
