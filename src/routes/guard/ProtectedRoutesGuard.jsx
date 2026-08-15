@@ -4,7 +4,7 @@ import { Spinner, Box } from '@chakra-ui/react';
 function ProtectedRoutesGuard() {
 	const { data: isAuth, isLoading, isError } = useGetMeQuery();
 	const location = useLocation();
-	console.log(isAuth);
+
 	if (isLoading) {
 		return (
 			<Box height='100vh'>

@@ -13,11 +13,13 @@ import {
 	AbsoluteCenter,
 } from '@chakra-ui/react';
 import React, { useState } from 'react';
-import { Link } from 'react-router';
+import { useGoogleLogin } from '@react-oauth/google';
+import { Link, useNavigate } from 'react-router';
 import { useForm } from 'react-hook-form';
 import Verification from '../component/verification';
 import { useSignupMutation } from './store/signUpApi';
 import { useToast } from '@chakra-ui/react';
+import { useGoogleSigninMutation } from '../signin/store/signInApi';
 function Register() {
 	const toast = useToast();
 	const {
@@ -27,7 +29,9 @@ function Register() {
 	} = useForm();
 	const [isVerifying, setVerifying] = useState(false);
 	const [signup, { isLoading }] = useSignupMutation();
-
+	const [googleSignin, { isLoading: googleSiginLoading }] =
+		useGoogleSigninMutation();
+	const navigate = useNavigate();
 	const handleRegister = async (values) => {
 		try {
 			const res = await signup(values).unwrap();
@@ -48,6 +52,21 @@ function Register() {
 		}
 	};
 
+	const handleGoogleSignIn = useGoogleLogin({
+		onSuccess: async (tokenResponse) => {
+			await googleSignin(tokenResponse.access_token).unwrap();
+			navigate('/dashboard');
+		},
+		onError: () => {
+			toast({
+				status: 'error',
+				variant: 'solid',
+				isClosable: true,
+				description: 'Google authentication failed',
+			});
+		},
+		ux_mode: 'popup',
+	});
 	// if (isVerifying) {
 	// 	return <Verification />;
 	// }
@@ -110,8 +129,9 @@ function Register() {
 					</AbsoluteCenter>
 				</Box>
 				<Button
-					isLoading={isLoading}
-					disable={isLoading}
+					onClick={() => handleGoogleSignIn()}
+					isLoading={googleSiginLoading}
+					disable={googleSiginLoading}
 					width={'100%'}
 					className='w-full'
 					bgColor='#080808'

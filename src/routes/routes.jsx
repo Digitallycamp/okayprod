@@ -37,42 +37,43 @@ const routeObjects = [
 	},
 
 	{
-		element: (
-			<ProtectedRoutesGuard>
-				<DashboardLayout />
-			</ProtectedRoutesGuard>
-		),
-		path: 'dashboard',
-		errorElement: <p>NOT FOUND</p>,
+		element: <ProtectedRoutesGuard />,
 		children: [
-			{ index: true, element: <DashboardOverview /> },
 			{
-				path: 'new-order',
-				element: (
-					<RoleProtectedGuard allowedRole={['seller', 'admin']}>
-						<p>New order</p>
-					</RoleProtectedGuard>
-				),
-			},
-			{ path: 'orders', element: <p>Orders</p> },
-			{ path: 'payment-settings', element: <p>Payment settings</p> },
-			{ path: 'sales', element: <p>Sales</p> },
-			{ path: 'transactions', element: <p>Transactions</p> },
-			{
-				path: 'users',
-				element: (
-					<RoleProtectedGuard allowedRole={['admin']}>
-						<p>Users</p>
-					</RoleProtectedGuard>
-				),
-			},
-			{
-				path: 'customers',
-				element: (
-					<RoleProtectedGuard allowedRole={['admin']}>
-						<p>Customers</p>
-					</RoleProtectedGuard>
-				),
+				path: 'dashboard',
+				errorElement: <p>NOT FOUND</p>,
+				element: <DashboardLayout />,
+				children: [
+					{ index: true, element: <DashboardOverview /> },
+					{
+						path: 'new-order',
+						element: (
+							<RoleProtectedGuard allowedRole={['seller', 'admin']}>
+								<p>New order</p>
+							</RoleProtectedGuard>
+						),
+					},
+					{ path: 'orders', element: <p>Orders</p> },
+					{ path: 'payment-settings', element: <p>Payment settings</p> },
+					{ path: 'report', element: <p>Report</p> },
+					{ path: 'transactions', element: <p>Transactions</p> },
+					{
+						path: 'sellers',
+						element: (
+							<RoleProtectedGuard allowedRole={['admin']}>
+								<p>sellers</p>
+							</RoleProtectedGuard>
+						),
+					},
+					{
+						path: 'sellers/:id',
+						element: (
+							<RoleProtectedGuard allowedRole={['admin']}>
+								<p>details</p>
+							</RoleProtectedGuard>
+						),
+					},
+				],
 			},
 		],
 	},

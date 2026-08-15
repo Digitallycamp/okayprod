@@ -15,13 +15,38 @@ export const signInApi = createApi({
 			}),
 		}),
 
+		googleSignin: build.mutation({
+			query: (token) => {
+				console.log(token);
+				return {
+					url: 'auth/google',
+					method: 'POST',
+					body: { token: token },
+				};
+			},
+		}),
+
 		getMe: build.query({
 			query: () => ({
 				url: 'auth/me',
 				method: 'GET',
 			}),
 		}),
+
+		logout: build.mutation({
+			query: () => {
+				return {
+					url: 'auth/logout',
+					method: 'POST',
+				};
+			},
+		}),
 	}),
 });
 
-export const { useSignInMutation, useGetMeQuery } = signInApi;
+export const {
+	useSignInMutation,
+	useGoogleSigninMutation,
+	useGetMeQuery,
+	useLogoutMutation,
+} = signInApi;
