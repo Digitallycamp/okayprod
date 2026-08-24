@@ -10,7 +10,7 @@ import { store } from './core/store/index.js';
 
 const colors = {
 	brand: {
-		900: '#2f258a',
+		900: '#9A4600',
 		800: '#3524af',
 		700: '#4129d9',
 		600: '#4f39f6',

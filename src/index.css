@@ -5,3 +5,15 @@
 body {
 	font-family: 'JetBrains Mono', monospace;
 }
+
+.nav-base {
+	display: flex;
+	align-items: center;
+	height: 52px;
+}
+.nav-active {
+	border-bottom: 1px solid #f48031;
+	display: flex;
+	align-items: center;
+	height: 52px;
+}

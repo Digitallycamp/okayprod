@@ -9,6 +9,9 @@ import Signin from '../features/auth/signin';
 import ProtectedRoutesGuard from './guard/ProtectedRoutesGuard';
 import RoleProtectedGuard from './guard/RoleProtectedGuard';
 import DashboardOverview from '../features/admin/dashboard';
+import { Link } from 'react-router';
+import AddNewProduct from '../features/admin/new-order';
+import SettingsProfilePage from '../features/admin/settings';
 // const DashboardOverview = lazy(() =>
 // 	import('../features/admin/DashboardLayout')
 // );
@@ -37,6 +40,15 @@ const routeObjects = [
 	},
 
 	{
+		path: '/',
+		element: (
+			<div>
+				Home <Link to='/signin'>Signin</Link>
+			</div>
+		),
+	},
+
+	{
 		element: <ProtectedRoutesGuard />,
 		children: [
 			{
@@ -47,14 +59,11 @@ const routeObjects = [
 					{ index: true, element: <DashboardOverview /> },
 					{
 						path: 'new-order',
-						element: (
-							<RoleProtectedGuard allowedRole={['seller', 'admin']}>
-								<p>New order</p>
-							</RoleProtectedGuard>
-						),
+						element: <AddNewProduct />,
 					},
 					{ path: 'orders', element: <p>Orders</p> },
-					{ path: 'payment-settings', element: <p>Payment settings</p> },
+					{ path: 'inventory', element: <p>Inventory</p> },
+					{ path: 'settings', element: <SettingsProfilePage /> },
 					{ path: 'report', element: <p>Report</p> },
 					{ path: 'transactions', element: <p>Transactions</p> },
 					{
