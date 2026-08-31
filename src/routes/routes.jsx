@@ -12,6 +12,7 @@ import DashboardOverview from '../features/admin/dashboard';
 import { Link } from 'react-router';
 import AddNewProduct from '../features/admin/new-order';
 import SettingsProfilePage from '../features/admin/settings';
+import Transactions from '../features/admin/transactions'
 // const DashboardOverview = lazy(() =>
 // 	import('../features/admin/DashboardLayout')
 // );
@@ -65,7 +66,7 @@ const routeObjects = [
 					{ path: 'inventory', element: <p>Inventory</p> },
 					{ path: 'settings', element: <SettingsProfilePage /> },
 					{ path: 'report', element: <p>Report</p> },
-					{ path: 'transactions', element: <p>Transactions</p> },
+					{ path: 'transactions', element: <Transactions /> },
 					{
 						path: 'sellers',
 						element: (

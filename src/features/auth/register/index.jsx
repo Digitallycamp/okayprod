@@ -131,7 +131,7 @@ function Register() {
 				<Button
 					onClick={() => handleGoogleSignIn()}
 					isLoading={googleSiginLoading}
-					disable={googleSiginLoading}
+					disabled={googleSiginLoading}
 					width={'100%'}
 					className='w-full'
 					bgColor='#080808'
