@@ -14,10 +14,12 @@ import {
 	Box,
 } from '@chakra-ui/react';
 import React from 'react';
+import { useGoogleLogin } from '@react-oauth/google';
 import { Link, useNavigate } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { useSignInMutation } from './store/signInApi';
 import { useToast } from '@chakra-ui/react';
+import { useGoogleSigninMutation } from '../signin/store/signInApi';
 function Signin() {
 	const toast = useToast();
 	const {
@@ -26,6 +28,8 @@ function Signin() {
 		formState: { errors },
 	} = useForm();
 	const [signIn, { isLoading }] = useSignInMutation();
+	const [googleSignin, { isLoading: googleSiginLoading }] =
+			useGoogleSigninMutation();
 	const navigate = useNavigate();
 	const handleSingin = async (values) => {
 		try {
@@ -47,6 +51,22 @@ function Signin() {
 			});
 		}
 	};
+
+	const handleGoogleSignIn = useGoogleLogin({
+			onSuccess: async (tokenResponse) => {
+				await googleSignin(tokenResponse.access_token).unwrap();
+				navigate('/dashboard');
+			},
+			onError: () => {
+				toast({
+					status: 'error',
+					variant: 'solid',
+					isClosable: true,
+					description: 'Google authentication failed',
+				});
+			},
+			ux_mode: 'popup',
+		});
 
 	return (
 		<div className='px-8 py-16 h-screen overflow-auto'>
@@ -108,6 +128,9 @@ function Signin() {
 				</Box>
 				<Button
 					type='button'
+					onClick={() => handleGoogleSignIn()}
+					isLoading={googleSiginLoading}
+					disabled={googleSiginLoading}
 					width={'100%'}
 					className='w-full'
 					bgColor='#080808'
