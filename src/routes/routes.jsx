@@ -12,7 +12,12 @@ import DashboardOverview from '../features/admin/dashboard';
 import { Link } from 'react-router';
 import AddNewProduct from '../features/admin/new-order';
 import SettingsProfilePage from '../features/admin/settings';
+import ProfileDetails from '../features/admin/settings/ProfileDetails';
+import StorefrontSettings from '../features/admin/settings/StorefrontSettings';
+import SettingsLayout from '../features/admin/settings/SettingsLayout';
+import Inventory from '../features/admin/dashboard/inventory';
 import Transactions from '../features/admin/transactions'
+
 // const DashboardOverview = lazy(() =>
 // 	import('../features/admin/DashboardLayout')
 // );
@@ -63,8 +68,34 @@ const routeObjects = [
 						element: <AddNewProduct />,
 					},
 					{ path: 'orders', element: <p>Orders</p> },
-					{ path: 'inventory', element: <p>Inventory</p> },
-					{ path: 'settings', element: <SettingsProfilePage /> },
+					{ path: 'inventory', element: <Inventory/> },
+					// { path: 'settings', element: <SettingsProfilePage /> },
+					{
+						path: 'settings',
+						element: <SettingsLayout />,
+						children: [
+						{
+							path: 'profile',
+							element: <ProfileDetails />,
+						},
+						{
+							path: 'storefront',
+							element: <StorefrontSettings />,
+						},
+						// {
+						// 	path: 'payments',
+						// 	element: <PaymentBilling />,
+						// },
+						// {
+						// 	path: 'billing',
+						// 	element: <PaymentBilling />, // Reuse placeholder
+						// },
+						// {
+						// 	path: 'security',
+						// 	element: <SecurityAccess />,
+						// },
+						],
+					},
 					{ path: 'report', element: <p>Report</p> },
 					{ path: 'transactions', element: <Transactions /> },
 					{

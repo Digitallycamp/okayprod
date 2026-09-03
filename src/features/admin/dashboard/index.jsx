@@ -1,23 +1,20 @@
-import {
-	Box,
-	Stack,
-	Heading,
-	Text,
-	HStack,
-	Flex,
-	VStack,
-	Button,
-	Grid,
-} from '@chakra-ui/react';
+import {Box,Stack,Heading,Text,HStack,Flex,VStack,Button,Grid,} from '@chakra-ui/react';
 import { Overviewstats } from '../../../utils/statsData';
 import { useGetMeQuery } from '../../auth/signin/store/signInApi';
 import OverViewCard from './components/card';
-import { DownloadIcon, MailIcon, PlusIcon } from 'lucide-react';
+import { Download, Plus, Search, SlidersHorizontal } from 'lucide-react';
 import EarningsChart from './components/card/earning-chart';
 import RecentActivity from './components/recent-activity';
-
+import PageHeader from './components/pageHeader';
 function DashboardOverview() {
 	const { data: user, isLoading } = useGetMeQuery();
+	const handleExportReport = () => {
+    
+   };
+
+  const handleNewProduct = () => {
+    
+  };
 	console.log(user);
 	// TODO
 	/**************
@@ -27,21 +24,18 @@ function DashboardOverview() {
 	 * and a full with chart of sales that can be filtered by months
 	 */
 	return (
-		<Stack pt='68px' px='40px'>
-			<Flex justifyContent='space-between' alignItems='end'>
-				<Stack>
-					<Heading as='h1'>Welcome back, {user.username} </Heading>
-					<Text fontSize='xs'>
-						Here's what's happening with your store today.
-					</Text>
-				</Stack>
-				<HStack>
-					<Button leftIcon={<DownloadIcon />}>Export Report</Button>
-					<Button leftIcon={<PlusIcon />} bgColor='brand.900' color='#fff'>
-						New Product
-					</Button>
-				</HStack>
-			</Flex>
+		<Stack pt='68px'  p={{ base: 4, md: 6, lg: 8 }}>
+			<PageHeader
+				title={`Welcome back, ${user.username}`}
+				description="Here's what's happening with your store today."
+				secondaryButtonText="Export Report"
+				secondaryButtonIcon={<Download size={18} />}
+				onSecondaryClick={handleExportReport}
+				primaryButtonText="New Product"
+				primaryButtonIcon={<Plus size={18} />}
+				onPrimaryClick={handleNewProduct}
+				mb="8"
+			/>
 			<Grid templateColumns='repeat(4, 1fr)' gap='6' pt={10}>
 				{Overviewstats.map((data) => (
 					<OverViewCard key={data.id} data={data} />
