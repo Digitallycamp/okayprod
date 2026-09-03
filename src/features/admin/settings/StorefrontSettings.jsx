@@ -102,12 +102,6 @@ export default function StorefrontSettings() {
   return (
     <Box w="full">
       <VStack align="stretch" spacing={1} mb={8}>
-        {/* <Heading as="h1" size="lg" fontWeight="bold" color="gray.800">
-          Storefront Settings
-        </Heading>
-        <Text color="gray.500" fontSize="md">
-          Manage your store's appearance, domain, and search engine presence.
-        </Text> */}
         <PageHeader
                 title="Storefront Settings"
                 description="Manage your store's appearance, domain, and search engine presence." mb="0"
