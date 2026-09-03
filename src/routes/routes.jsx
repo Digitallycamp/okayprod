@@ -16,6 +16,8 @@ import ProfileDetails from '../features/admin/settings/ProfileDetails';
 import StorefrontSettings from '../features/admin/settings/StorefrontSettings';
 import SettingsLayout from '../features/admin/settings/SettingsLayout';
 import Inventory from '../features/admin/dashboard/inventory';
+import Transactions from '../features/admin/transactions'
+
 // const DashboardOverview = lazy(() =>
 // 	import('../features/admin/DashboardLayout')
 // );
@@ -95,7 +97,7 @@ const routeObjects = [
 						],
 					},
 					{ path: 'report', element: <p>Report</p> },
-					{ path: 'transactions', element: <p>Transactions</p> },
+					{ path: 'transactions', element: <Transactions /> },
 					{
 						path: 'sellers',
 						element: (
