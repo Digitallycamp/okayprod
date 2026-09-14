@@ -15,14 +15,6 @@ function DashboardOverview() {
   const handleNewProduct = () => {
     
   };
-	console.log(user);
-	// TODO
-	/**************
-	 * 1. THEIS OVERVIEW CAN ONLY BEEN ACCESS BY ADMIN
-	 * WHTA IS IT?
-	 * Metic card, obe for total selles, one for total customer
-	 * and a full with chart of sales that can be filtered by months
-	 */
 	return (
 		<Stack pt='68px'  p={{ base: 4, md: 6, lg: 8 }}>
 			<PageHeader

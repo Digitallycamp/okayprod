@@ -17,10 +17,9 @@ import StorefrontSettings from '../features/admin/settings/StorefrontSettings';
 import SettingsLayout from '../features/admin/settings/SettingsLayout';
 import Inventory from '../features/admin/dashboard/inventory';
 import Transactions from '../features/admin/transactions'
+import SecurityAccess from '../features/admin/settings/securityAccess';
+import paymentBilling from '../features/admin/settings/paymentBilling';
 
-// const DashboardOverview = lazy(() =>
-// 	import('../features/admin/DashboardLayout')
-// );
 
 const routeObjects = [
 	{
@@ -69,31 +68,26 @@ const routeObjects = [
 					},
 					{ path: 'orders', element: <p>Orders</p> },
 					{ path: 'inventory', element: <Inventory/> },
-					// { path: 'settings', element: <SettingsProfilePage /> },
 					{
 						path: 'settings',
 						element: <SettingsLayout />,
 						children: [
 						{
-							path: 'profile',
+							index:true,
 							element: <ProfileDetails />,
 						},
 						{
 							path: 'storefront',
 							element: <StorefrontSettings />,
 						},
-						// {
-						// 	path: 'payments',
-						// 	element: <PaymentBilling />,
-						// },
-						// {
-						// 	path: 'billing',
-						// 	element: <PaymentBilling />, // Reuse placeholder
-						// },
-						// {
-						// 	path: 'security',
-						// 	element: <SecurityAccess />,
-						// },
+						{
+							path: 'payments',
+							element: <paymentBilling />,
+						},
+						{
+							path: 'security',
+							element: <SecurityAccess />,
+						},
 						],
 					},
 					{ path: 'report', element: <p>Report</p> },
