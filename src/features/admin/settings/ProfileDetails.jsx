@@ -1,79 +1,24 @@
-import { useState, useEffect, useRef } from 'react';
-import {
-	Box,
-	Flex,
-	Stack,
-	HStack,
-	Text,
-	Heading,
-	Button,
-	Input,
-	InputGroup,
-	InputLeftElement,
-	Textarea,
-	Avatar,
-	Icon,
-	Spinner,
-	Center,
-} from '@chakra-ui/react';
+import { useState, useRef } from 'react';
+import { Box, Flex, Stack, HStack, VStack, Text, Heading, Button, Input, InputGroup, InputLeftElement, Textarea, Avatar, Icon, } from '@chakra-ui/react';
 import { Mail, ArrowRight } from 'lucide-react';
-import useNotify from '../../../hooks/useNotify';
-import {
-	useGetProfileQuery,
-	useUpdateProfileMutation,
-	useUploadAvatarMutation,
-} from './store/profileApi';
-
-// Fallback shown only until the API resolves (or if it 404s).
-const FALLBACK_VALUES = {
-	firstName: '',
-	lastName: '',
-	email: '',
-	website: '',
-	bio: '',
+const INITIAL_VALUES = {
+	firstName: 'Jane',
+	lastName: 'Doe',
+	email: 'jane@creator.co',
+	website: 'janedoe.com',
+	bio: 'Digital designer and template creator focusing on minimal aesthetics and high-conversion layouts.',
 };
 
-// Default placeholder avatar (frontend-only preview until Cloudinary task)
 const DEFAULT_AVATAR =
 	'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop&crop=faces';
 
 export default function ProfileDetails() {
-	const notify = useNotify();
 	const fileInputRef = useRef(null);
-
-	// Server data + mutation
-	const { data: profileRes, isLoading } = useGetProfileQuery();
-	const [updateProfile, { isLoading: isSaving }] = useUpdateProfileMutation();
-	const [uploadAvatar, { isLoading: isUploadingAvatar }] = useUploadAvatarMutation();
-
-	// Local editable state
-	const [values, setValues] = useState(FALLBACK_VALUES);
-	const [savedValues, setSavedValues] = useState(FALLBACK_VALUES);
+	const [values, setValues] = useState(INITIAL_VALUES);
 	const [avatarPreview, setAvatarPreview] = useState(DEFAULT_AVATAR);
 
 	const bioLimit = 160;
 	const bioCount = values.bio.length;
-
-	// Sync server → local once it arrives
-	useEffect(() => {
-		const data = profileRes?.data;
-		if (!data) return;
-
-		const serverState = {
-			firstName: data.firstName ?? '',
-			lastName: data.lastName ?? '',
-			email: data.email ?? '',
-			website: data.website ?? '',
-			bio: data.bio ?? '',
-			avatar: data.avatar ?? null,
-		};
-
-		setValues(serverState);
-		setSavedValues(serverState);
-
-		// If DB already has a logo/avatar URL, use it
-		if (data.avatar) setAvatarPreview(data.avatar);
-	}, [profileRes]);
 
 	const handleChange = (field) => (e) => {
 		setValues((prev) => ({ ...prev, [field]: e.target.value }));
@@ -83,74 +28,22 @@ export default function ProfileDetails() {
 		fileInputRef.current?.click();
 	};
 
-	// Frontend-only preview. Cloudinary upload will be a future task.
-	const handleAvatarUpload = async (e) => {
-	const file = e.target.files?.[0];
-	if (!file) return;
-
-	// Instant local preview
-	const reader = new FileReader();
-	reader.onloadend = () => setAvatarPreview(reader.result);
-	reader.readAsDataURL(file);
-
-	// Upload to backend
-	const formData = new FormData();
-	formData.append('avatar', file);
-
-	try {
-		const res = await uploadAvatar(formData).unwrap();
-		notify.success(
-			'Avatar uploaded',
-			res?.message || 'Your avatar has been saved.'
-		);
-		if (res?.data?.avatar) {
-			setAvatarPreview(res.data.avatar);
-		}
-	} catch (err) {
-		notify.error(
-			'Upload failed',
-			err?.data?.message || 'Could not upload avatar.'
-		);
-		// Revert preview to last saved value
-		setAvatarPreview(savedValues.avatar || DEFAULT_AVATAR);
-	}
-};
+	const handleAvatarUpload = (e) => {
+		const file = e.target.files?.[0];
+		if (!file) return;
+		const reader = new FileReader();
+		reader.onloadend = () => setAvatarPreview(reader.result);
+		reader.readAsDataURL(file);
+	};
 
 	const handleRemove = () => {
 		setAvatarPreview(null);
 	};
 
-	const handleSubmit = async (e) => {
+	const handleSubmit = (e) => {
 		e.preventDefault();
-
-		try {
-			const res = await updateProfile({
-				firstName: values.firstName,
-				lastName: values.lastName,
-				email: values.email,
-				website: values.website,
-				bio: values.bio,
-			}).unwrap();
-
-			notify.success(
-				'Profile saved',
-				res?.message || 'Your profile has been updated.'
-			);
-		} catch (err) {
-			notify.error(
-				'Error',
-				err?.data?.message || 'Failed to save profile.'
-			);
-		}
+		console.log('Profile form submitted (frontend only):', values);
 	};
-
-	if (isLoading) {
-		return (
-			<Center minH="300px">
-				<Spinner color="#A94F00" size="lg" />
-			</Center>
-		);
-	}
 
 	return (
 		<Box w="full">
@@ -161,8 +54,6 @@ export default function ProfileDetails() {
 				style={{ display: 'none' }}
 				onChange={handleAvatarUpload}
 			/>
-
-			{/* ---------- CARD 1: Avatar & Identity ---------- */}
 			<Box
 				bg="white"
 				borderRadius="16px"
@@ -177,6 +68,7 @@ export default function ProfileDetails() {
 					gap={{ base: 5, md: 6 }}
 					align={{ base: 'flex-start', sm: 'center' }}
 				>
+					{/* Avatar */}
 					<Avatar
 						size="2xl"
 						name={`${values.firstName} ${values.lastName}`}
@@ -187,6 +79,7 @@ export default function ProfileDetails() {
 						flexShrink={0}
 					/>
 
+					{/* Text + Buttons */}
 					<Box flex={1}>
 						<Heading
 							as="h2"
@@ -255,6 +148,7 @@ export default function ProfileDetails() {
 			>
 				<form onSubmit={handleSubmit}>
 					<Stack spacing={6}>
+						{/* First Name / Last Name row */}
 						<Stack
 							direction={{ base: 'column', md: 'row' }}
 							spacing={{ base: 5, md: 6 }}
@@ -300,6 +194,7 @@ export default function ProfileDetails() {
 							</FormField>
 						</Stack>
 
+						{/* Contact Email */}
 						<FormField label="CONTACT EMAIL">
 							<InputGroup>
 								<InputLeftElement h="48px" pointerEvents="none" pl={4}>
@@ -327,6 +222,7 @@ export default function ProfileDetails() {
 							</InputGroup>
 						</FormField>
 
+						{/* Personal Website / Link */}
 						<FormField label="PERSONAL WEBSITE / LINK">
 							<Flex
 								border="1px solid"
@@ -368,8 +264,13 @@ export default function ProfileDetails() {
 							</Flex>
 						</FormField>
 
+						{/* Short Bio */}
 						<Box>
-							<Flex justify="space-between" align="center" mb={2}>
+							<Flex
+								justify="space-between"
+								align="center"
+								mb={2}
+							>
 								<Text
 									fontSize="12px"
 									fontWeight="600"
@@ -378,7 +279,11 @@ export default function ProfileDetails() {
 								>
 									SHORT BIO
 								</Text>
-								<Text fontSize="12px" fontWeight="600" color="#67564E">
+								<Text
+									fontSize="12px"
+									fontWeight="600"
+									color="#67564E"
+								>
 									{bioCount} / {bioLimit}
 								</Text>
 							</Flex>
@@ -411,6 +316,7 @@ export default function ProfileDetails() {
 							</Text>
 						</Box>
 
+						{/* Save Changes */}
 						<Flex justify="flex-end" pt={2}>
 							<Button
 								type="submit"
@@ -425,8 +331,6 @@ export default function ProfileDetails() {
 								borderRadius="12px"
 								_hover={{ bg: '#8F3F00' }}
 								_active={{ bg: '#7A3500' }}
-								isLoading={isSaving}
-								isDisabled={isSaving}
 							>
 								Save Changes
 							</Button>
@@ -438,6 +342,8 @@ export default function ProfileDetails() {
 	);
 }
 
+/* Small local helper — a label + field wrapper.
+   Kept in this file on purpose: no new files, no new folders. */
 function FormField({ label, children }) {
 	return (
 		<Box flex={1}>
