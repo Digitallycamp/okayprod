@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Box, Text, Input, Button, Table, Thead, Tbody, Tr, Th, Td, Flex, Image, Popover, PopoverTrigger, PopoverContent, Select, Checkbox } from '@chakra-ui/react';
 import { Search, SlidersHorizontal, ChevronLeft, ChevronRight, Columns3 } from 'lucide-react';
+import { useDebounceValue } from 'usehooks-ts';
 import { useGetTransactionsQuery } from '../store/transactionApi';
 import { currencyformatter } from '../../../../utils/currencyFormatter';
 
@@ -12,12 +13,14 @@ const TransactionTable = ({
   const [limit] = useState(6);
   const [tempStatus, setTempStatus] = useState(status);
 
+  const [debouncedSearch] = useDebounceValue(search, 500);
+
   const { data: transactionsResponse, isLoading, isError } = useGetTransactionsQuery({
-    search, status, startDate, endDate, page, limit,
+    search: debouncedSearch, status, startDate, endDate, page, limit,
   });
 
   const transactions = useMemo(
-    () => transactionsResponse?.data?.transactions ?? [],
+    () => transactionsResponse?.data ?? [],
     [transactionsResponse]
   );
 
@@ -27,7 +30,7 @@ const TransactionTable = ({
     }
   }, [transactions, onTransactionsChange]);
 
-  const pagination = transactionsResponse?.data?.pagination;
+  const pagination = transactionsResponse?.pagination;
   const totalTransactions = pagination?.total ?? 0;
   const totalPages = pagination?.totalPages ?? 1;
 

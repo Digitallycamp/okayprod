@@ -3,6 +3,8 @@ import { Box, Text, Heading, Button, Flex, Input, Popover, PopoverTrigger, Popov
 import { Calendar, Download } from 'lucide-react';
 import StatCards from './components/StatCards';
 import TransactionTable from './components/TransactionTable';
+import { useLazyExportTransactionsQuery } from './store/transactionApi';
+import useGenerateCSV from '../../../hooks/useGenerateCSV';
 
 const Transactions = () => {
   const today = new Date();
@@ -21,6 +23,9 @@ const Transactions = () => {
     orderId: true, customer: true, product: true, date: true, amount: true, status: true,
   });
   const [filteredTransactions, setFilteredTransactions] = useState([]);
+
+  const [exportTransactions, { isFetching: isExporting }] = useLazyExportTransactionsQuery();
+  const generateCSV = useGenerateCSV();
 
   const handleColumnVisibilityChange = (column, isVisible) => {
     setColumnVisibility((prev) => ({
@@ -54,22 +59,11 @@ const Transactions = () => {
 
   const handleExportCSV = async () => {
     try {
-      const params = new URLSearchParams({
-        search, status, startDate, endDate, page: 1, limit: 10000,
-      });
+      const result = await exportTransactions({
+        search, status, startDate, endDate, page: 1, limit: 100,
+      }).unwrap();
 
-      const response = await fetch(`http://localhost:8000/api/v1/transactions?${params.toString()}`, {
-        method: 'GET',
-        credentials: 'include',
-      });
-
-      const result = await response.json();
-
-      if (!result.success) {
-        throw new Error('Failed to fetch transactions');
-      }
-
-      const transactions = result.data?.transactions ?? [];
+      const transactions = result.data ?? [];
 
       if (transactions.length === 0) {
         alert('There are no transactions to export.');
@@ -78,34 +72,12 @@ const Transactions = () => {
 
       const headers = ['Order ID', 'Customer', 'Email', 'Product', 'Type', 'Date', 'Time', 'Amount', 'Status'];
 
-      const escapeCSV = (value) => {
-        const stringValue = String(value ?? '');
-        if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
-          return `"${stringValue.replace(/"/g, '""')}"`;
-        }
-        return stringValue;
-      };
-
       const rows = transactions.map((transaction) => [
         transaction.id, transaction.customer, transaction.email, transaction.product, transaction.type,
         transaction.date, transaction.time, transaction.amount, transaction.status,
       ]);
 
-      const csvContent = [
-        headers.map(escapeCSV).join(','),
-        ...rows.map((row) => row.map(escapeCSV).join(',')),
-      ].join('\n');
-
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-
-      link.href = url;
-      link.setAttribute('download', `transactions-${startDate}-to-${endDate}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      generateCSV(rows, headers, `transactions-${startDate}-to-${endDate}.csv`);
     } catch (error) {
       console.error('CSV export failed:', error);
       alert('Failed to export transactions.');
@@ -155,7 +127,7 @@ const Transactions = () => {
             </PopoverContent>
           </Popover>
 
-          <Button type="button" onClick={handleExportCSV} height="42px" padding={{ base: '0 12px', md: '0 18px' }} border="none" borderRadius="9px" background="#A94F00" color="#FFFFFF" display="flex" alignItems="center" gap={{ base: '6px', md: '9px' }} cursor="pointer" fontSize={{ base: '13px', md: '14px' }} fontWeight={600} _hover={{ background: '#A94F00' }} flex={{ base: 1, md: 'initial' }}>
+          <Button type="button" onClick={handleExportCSV} isLoading={isExporting} height="42px" padding={{ base: '0 12px', md: '0 18px' }} border="none" borderRadius="9px" background="#A94F00" color="#FFFFFF" display="flex" alignItems="center" gap={{ base: '6px', md: '9px' }} cursor="pointer" fontSize={{ base: '13px', md: '14px' }} fontWeight={600} _hover={{ background: '#A94F00' }} flex={{ base: 1, md: 'initial' }}>
             <Download size={17} />
             Export CSV
           </Button>

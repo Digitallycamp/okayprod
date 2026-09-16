@@ -4,7 +4,7 @@ export const transactionApi = createApi({
   reducerPath: 'transactionApi',
 
   baseQuery: fetchBaseQuery({
-    baseUrl: 'http://localhost:8000/api/v1',
+    baseUrl: import.meta.env.VITE_BASE_URL,
     credentials: 'include',
   }),
 
@@ -31,8 +31,29 @@ export const transactionApi = createApi({
           limit,
         },
       }),
-
       providesTags: ['Transactions'],
+    }),
+
+    exportTransactions: builder.query({
+      query: ({
+        search = '',
+        status = '',
+        startDate = '',
+        endDate = '',
+        page = 1,
+        limit = 10000,
+      } = {}) => ({
+        url: '/transactions',
+        method: 'GET',
+        params: {
+          search,
+          status,
+          startDate,
+          endDate,
+          page,
+          limit,
+        },
+      }),
     }),
 
     getTransactionStats: builder.query({
@@ -47,7 +68,6 @@ export const transactionApi = createApi({
           endDate,
         },
       }),
-
       providesTags: ['TransactionStats'],
     }),
 
@@ -57,7 +77,6 @@ export const transactionApi = createApi({
         method: 'POST',
         body: transactionData,
       }),
-
       invalidatesTags: ['Transactions', 'TransactionStats'],
     }),
   }),
@@ -65,6 +84,7 @@ export const transactionApi = createApi({
 
 export const {
   useGetTransactionsQuery,
+  useLazyExportTransactionsQuery,
   useGetTransactionStatsQuery,
   useCreateTransactionMutation,
 } = transactionApi;
