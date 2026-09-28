@@ -1,46 +1,38 @@
-import { lazy } from 'react';
-
+import { lazy, Suspense } from 'react';
+import { Link } from 'react-router';
+import { Spinner, Center } from '@chakra-ui/react';
 import DashboardLayout from '../features/admin/DashboardLayout';
 import AuthLayout from '../features/auth/AuthLayout';
-import ForgotPassword from '../features/auth/forgot-password';
-import Register from '../features/auth/register';
-import ResetPasword from '../features/auth/reset-password';
-import Signin from '../features/auth/signin';
 import ProtectedRoutesGuard from './guard/ProtectedRoutesGuard';
 import RoleProtectedGuard from './guard/RoleProtectedGuard';
-import DashboardOverview from '../features/admin/dashboard';
-import { Link } from 'react-router';
-import AddNewProduct from '../features/admin/new-order';
-import SettingsProfilePage from '../features/admin/settings';
-import ProfileDetails from '../features/admin/settings/ProfileDetails';
-import StorefrontSettings from '../features/admin/settings/StorefrontSettings';
-import SettingsLayout from '../features/admin/settings/SettingsLayout';
-import Inventory from '../features/admin/dashboard/inventory';
-import Transactions from '../features/admin/transactions'
-import SecurityAccess from '../features/admin/settings/securityAccess';
-import paymentBilling from '../features/admin/settings/paymentBilling';
-
+const ForgotPassword = lazy(() => import('../features/auth/forgot-password'));
+const Register = lazy(() => import('../features/auth/register'));
+const ResetPasword = lazy(() => import('../features/auth/reset-password'));
+const Signin = lazy(() => import('../features/auth/signin'));
+const DashboardOverview = lazy(() => import('../features/admin/dashboard'));
+const AddNewProduct = lazy(() => import('../features/admin/new-order'));
+const ProfileDetails = lazy(() => import('../features/admin/settings/ProfileDetails'));
+const StorefrontSettings = lazy(() => import('../features/admin/settings/StorefrontSettings'));
+const SettingsLayout = lazy(() => import('../features/admin/settings/SettingsLayout'));
+const Inventory = lazy(() => import('../features/admin/dashboard/inventory'));
+const Transactions = lazy(() => import('../features/admin/transactions'));
+const SecurityAccess = lazy(() => import('../features/admin/settings/securityAccess'));
+const paymentBilling = lazy(() => import('../features/admin/settings/paymentBilling'));
+const suspenseFallback = (
+	<Center minH="200px">
+		<Spinner color="#A94F00" size="lg" />
+	</Center>
+);
+const withSuspense = (element) => <Suspense fallback={suspenseFallback}>{element}</Suspense>;
 
 const routeObjects = [
 	{
 		element: <AuthLayout />,
 		children: [
-			{
-				path: 'register',
-				element: <Register />,
-			},
-			{
-				path: 'signin',
-				element: <Signin />,
-			},
-			{
-				path: 'forgot-password',
-				element: <ForgotPassword />,
-			},
-			{
-				path: 'reset-password/:token',
-				element: <ResetPasword />,
-			},
+			{ path: 'register', element: withSuspense(<Register />) },
+			{ path: 'signin', element: withSuspense(<Signin />) },
+			{ path: 'forgot-password', element: withSuspense(<ForgotPassword />) },
+			{ path: 'reset-password/:token', element: withSuspense(<ResetPasword />) },
 		],
 	},
 
@@ -59,39 +51,24 @@ const routeObjects = [
 			{
 				path: 'dashboard',
 				errorElement: <p>NOT FOUND</p>,
-				element: <DashboardLayout />,
+				element: withSuspense(<DashboardLayout />),
 				children: [
-					{ index: true, element: <DashboardOverview /> },
-					{
-						path: 'new-order',
-						element: <AddNewProduct />,
-					},
+					{ index: true, element: withSuspense(<DashboardOverview />) },
+					{ path: 'new-order', element: withSuspense(<AddNewProduct />) },
 					{ path: 'orders', element: <p>Orders</p> },
-					{ path: 'inventory', element: <Inventory/> },
+					{ path: 'inventory', element: withSuspense(<Inventory />) },
 					{
 						path: 'settings',
-						element: <SettingsLayout />,
+						element: withSuspense(<SettingsLayout />),
 						children: [
-						{
-							index:true,
-							element: <ProfileDetails />,
-						},
-						{
-							path: 'storefront',
-							element: <StorefrontSettings />,
-						},
-						{
-							path: 'payments',
-							element: <paymentBilling />,
-						},
-						{
-							path: 'security',
-							element: <SecurityAccess />,
-						},
+							{ index: true, element: withSuspense(<ProfileDetails />) },
+							{ path: 'storefront', element: withSuspense(<StorefrontSettings />) },
+							{ path: 'payments', element: withSuspense(<paymentBilling />) },
+							{ path: 'security', element: withSuspense(<SecurityAccess />) },
 						],
 					},
 					{ path: 'report', element: <p>Report</p> },
-					{ path: 'transactions', element: <Transactions /> },
+					{ path: 'transactions', element: withSuspense(<Transactions />) },
 					{
 						path: 'sellers',
 						element: (

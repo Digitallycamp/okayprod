@@ -72,22 +72,23 @@ export default function SecurityAccess() {
 
 	const handleUpdatePassword = async () => {
 		if (!currentPassword) {
-			notify.error('Error', 'Please enter your current password.');
+			notify('error', 'Error', 'Please enter your current password.');
 			return;
 		}
 
 		if (newPassword.length < 8) {
-			notify.error('Error', 'New password must be at least 8 characters.');
+			notify('error', 'Error', 'New password must be at least 8 characters.');
 			return;
 		}
 
 		if (newPassword !== confirmPassword) {
-			notify.error('Error', 'Passwords do not match.');
+			notify('error', 'Error', 'Passwords do not match.');
 			return;
 		}
 
 		if (newPassword === currentPassword) {
-			notify.error(
+			notify(
+				'error',
 				'Error',
 				'New password must be different from current password.'
 			);
@@ -101,7 +102,8 @@ export default function SecurityAccess() {
 				confirmPassword,
 			}).unwrap();
 
-			notify.success(
+			notify(
+				'success',
 				'Success',
 				res.message || 'Your password has been updated successfully.'
 			);
@@ -110,7 +112,8 @@ export default function SecurityAccess() {
 			setNewPassword('');
 			setConfirmPassword('');
 		} catch (err) {
-			notify.error(
+			notify(
+				'error',
 				'Error',
 				err?.data?.message || 'Failed to update password.'
 			);
@@ -123,7 +126,8 @@ export default function SecurityAccess() {
 
 		try {
 			const res = await update2FA(nextValue).unwrap();
-			notify.info(
+			notify(
+				'info',
 				nextValue ? '2FA Enabled' : '2FA Disabled',
 				res.message ||
 					(nextValue
@@ -132,7 +136,8 @@ export default function SecurityAccess() {
 			);
 		} catch (err) {
 			setIs2FAEnabled(!nextValue);
-			notify.error(
+			notify(
+				'error',
 				'Error',
 				err?.data?.message || 'Failed to update 2FA setting.'
 			);
@@ -140,7 +145,8 @@ export default function SecurityAccess() {
 	};
 
 	const handleRevokeSession = () => {
-		notify.info(
+		notify(
+			'info',
 			'Not Yet Available',
 			'Session revocation will be available in a future update.'
 		);
