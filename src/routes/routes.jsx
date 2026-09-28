@@ -11,6 +11,7 @@ import RoleProtectedGuard from './guard/RoleProtectedGuard';
 import DashboardOverview from '../features/admin/dashboard';
 import { Link } from 'react-router';
 import AddNewProduct from '../features/admin/new-order';
+import DigitalProduct from '../features/admin/products/add-product/DigitalProduct.jsx'
 import SettingsProfilePage from '../features/admin/settings';
 import Transactions from '../features/admin/transactions'
 // const DashboardOverview = lazy(() =>
@@ -61,6 +62,10 @@ const routeObjects = [
 					{
 						path: 'new-order',
 						element: <AddNewProduct />,
+					},
+					{
+						path: 'add-new-product',
+						element: <DigitalProduct />,
 					},
 					{ path: 'orders', element: <p>Orders</p> },
 					{ path: 'inventory', element: <p>Inventory</p> },
