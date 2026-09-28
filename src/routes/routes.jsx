@@ -5,7 +5,6 @@ import DashboardLayout from '../features/admin/DashboardLayout';
 import AuthLayout from '../features/auth/AuthLayout';
 import ProtectedRoutesGuard from './guard/ProtectedRoutesGuard';
 import RoleProtectedGuard from './guard/RoleProtectedGuard';
-<<<<<<< HEAD
 import DashboardOverview from '../features/admin/dashboard';
 import { Link } from 'react-router';
 import AddNewProduct from '../features/admin/new-order';
@@ -15,7 +14,6 @@ import Transactions from '../features/admin/transactions'
 // const DashboardOverview = lazy(() =>
 // 	import('../features/admin/DashboardLayout')
 // );
-=======
 const ForgotPassword = lazy(() => import('../features/auth/forgot-password'));
 const Register = lazy(() => import('../features/auth/register'));
 const ResetPasword = lazy(() => import('../features/auth/reset-password'));
@@ -35,7 +33,6 @@ const suspenseFallback = (
 	</Center>
 );
 const withSuspense = (element) => <Suspense fallback={suspenseFallback}>{element}</Suspense>;
->>>>>>> 5bed48ebeadf96324bd58a22e0c9991ce8a03868
 
 const routeObjects = [
 	{
