@@ -1,168 +1,168 @@
+import { Box, Text, Heading, Flex } from '@chakra-ui/react';
 import {
-  Box,
-  Text,
-  Heading,
-  Flex,
-} from '@chakra-ui/react';
-import {
-  Banknote,
-  ShoppingBag,
-  RotateCcw,
-  ArrowUpRight,
-  ArrowDownRight,
+  Banknote, Handbag, ClipboardMinus, TrendingUp, TrendingDown,
 } from 'lucide-react';
 
-import { transactionSummary } from '../../../../utils/transactionsData';
+import { useGetTransactionStatsQuery } from '../store/transactionApi';
 import { currencyformatter } from '../../../../utils/currencyFormatter';
 
-const StatCards = () => {
+const StatCards = ({ startDate, endDate }) => {
   const {
-    totalVolume,
-    totalOrders,
-    refundRate,
-    volumeGrowth,
-    orderGrowth,
-    refundGrowth,
-  } = transactionSummary;
+    data: statsResponse,
+    isLoading,
+    isError,
+  } = useGetTransactionStatsQuery({
+    startDate,
+    endDate,
+  });
+
+  const stats = statsResponse?.data;
+
+  const totalVolume = stats?.totalVolume ?? 0;
+  const totalOrders = stats?.totalOrders ?? 0;
+  const refundRate = stats?.refundRate ?? 0;
+
+  const volumeGrowth = stats?.volumeGrowth ?? 0;
+  const orderGrowth = stats?.orderGrowth ?? 0;
+  const refundGrowth = stats?.refundGrowth ?? 0;
 
   const cards = [
     {
       title: 'TOTAL VOLUME',
-      value: currencyformatter(totalVolume),
+      value: isLoading
+        ? '...'
+        : currencyformatter(totalVolume),
       growth: volumeGrowth,
-      comparison: 'vs last month',
       icon: Banknote,
       iconBg: '#FFF1E6',
       iconColor: '#A94F00',
     },
     {
       title: 'TOTAL ORDERS',
-      value: totalOrders.toLocaleString(),
+      value: isLoading
+        ? '...'
+        : totalOrders.toLocaleString(),
       growth: orderGrowth,
-      comparison: 'vs last month',
-      icon: ShoppingBag,
+      icon: Handbag,
       iconBg: '#D9F7EB',
       iconColor: '#087443',
     },
     {
-      title: 'TOTAL REFUNDS',
-      value: `${refundRate}%`,
+      title: 'REFUND RATE',
+      value: isLoading
+        ? '...'
+        : `${refundRate}%`,
       growth: refundGrowth,
-      comparison: 'vs last month',
-      icon: RotateCcw,
+      icon: ClipboardMinus,
       iconBg: '#FFF0F0',
       iconColor: '#C1121F',
     },
   ];
 
+  const getGrowthStyles = (growth) => {
+    if (growth > 0) {
+      return {
+        bg: '#EAF8F0',
+        color: '#087443',
+        icon: TrendingUp,
+      };
+    }
+
+    if (growth < 0) {
+      return {
+        bg: '#FFF0F0',
+        color: '#C1121F',
+        icon: TrendingDown,
+      };
+    }
+
+    return {
+      bg: '#F5F5F5',
+      color: '#604F45',
+      icon: null,
+    };
+  };
+
   return (
-    <Box
-      display="grid"
-      gridTemplateColumns="repeat(3, 1fr)"
-      gap="24px"
+    <Flex
+      gap="16px"
+      width="100%"
       marginBottom="40px"
+      flexWrap={{ base: 'wrap', md: 'nowrap' }}
     >
       {cards.map((card) => {
         const Icon = card.icon;
-        const isPositive = card.growth > 0;
-        const isNeutral = card.growth === 0;
+        const growthStyles = getGrowthStyles(card.growth);
+        const GrowthIcon = growthStyles.icon;
 
         return (
           <Box
-            key={card.title}
-            background="#FFFFFF"
-            borderRadius="14px"
-            padding="24px"
-            minHeight="150px"
-            border="1px solid #EDF0F2"
-            position="relative"
+            key={card.title} flex="1" minW={{ base: '100%', md: '0' }} border="1px solid" borderColor="#EDF0F2" borderRadius="12px" padding="20px" background="#FFFFFF"
           >
-            
-            <Box
-              position="absolute"
-              top="24px"
-              right="24px"
-              width="40px"
-              height="40px"
-              borderRadius="50%"
-              background={card.iconBg}
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-            >
-              <Icon size={20} color={card.iconColor} strokeWidth={2} />
-            </Box>
-
-            <Text
-              margin={0}
-              fontSize="12px"
-              fontWeight={600}
-              color="#604F45"
-              letterSpacing="0.5px"
-            >
-              {card.title}
-            </Text>
-
-
-            <Heading
-              as="h2"
-              margin="8px 0 20px"
-              fontSize="32px"
-              lineHeight={1.2}
-              fontWeight={700}
-              color="#092326"
-            >
-              {card.value}
-            </Heading>
-
-           
             <Flex
-              alignItems="center"
-              gap="8px"
+              justify="space-between"
+              align="flex-start"
             >
-              <Box
-                as="span"
-                display="inline-flex"
-                alignItems="center"
-                gap="2px"
-                padding="3px 7px"
-                borderRadius="8px"
-                background={isNeutral
-                  ? '#EEF0F2'
-                  : isPositive
-                    ? '#E2FFF3'
-                    : '#FFE9E9'}
-                color={isNeutral
-                  ? '#5F6368'
-                  : isPositive
-                    ? '#00A86B'
-                    : '#C1121F'}
-                fontSize="12px"
-                fontWeight={600}
-              >
-                {!isNeutral &&
-                  (isPositive ? (
-                    <ArrowUpRight size={13} />
-                  ) : (
-                    <ArrowDownRight size={13} />
-                  ))}
+              <Box>
+                <Text
+                  fontSize="12px" fontWeight="600" color="#604F45" letterSpacing="0.5px" mb="8px"
+                >
+                  {card.title}
+                </Text>
 
-                {isPositive ? '+' : ''}
-                {card.growth}%
+                <Heading
+                  fontSize="24px" fontWeight="700" color="#092326"
+                >
+                  {card.value}
+                </Heading>
               </Box>
 
+              <Flex
+                align="center" justify="center" width="40px" height="40px" borderRadius="10px" background={card.iconBg}
+              >
+                <Icon
+                  size={20}
+                  color={card.iconColor}
+                />
+              </Flex>
+            </Flex>
+
+            <Flex
+              align="center"
+              gap="6px"
+              marginTop="16px"
+            >
+              <Flex
+                align="center"
+                gap="3px"
+                padding="4px 8px"
+                borderRadius="20px"
+                background={growthStyles.bg}
+                color={growthStyles.color}
+              >
+                {GrowthIcon && (
+                  <GrowthIcon size={13} strokeWidth={2.5} />
+                )}
+
+                <Text
+                  fontSize="12px"
+                  fontWeight="600"
+                >
+                  {Math.abs(card.growth)}%
+                </Text>
+              </Flex>
+
               <Text
-                as="span"
-                fontSize="13px"
+                fontSize="12px"
                 color="#604F45"
               >
-                {card.comparison}
+                from previous period
               </Text>
             </Flex>
           </Box>
         );
       })}
-    </Box>
+    </Flex>
   );
 };
 
