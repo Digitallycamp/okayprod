@@ -20,16 +20,5 @@ const rootReducer = combineReducers({
 export const store = configureStore({
 	reducer: rootReducer,
 	middleware: (getDefaultMiddleware) =>
-<<<<<<< HEAD
-		getDefaultMiddleware().concat([signUpApi.middleware, signInApi.middleware, transactionApi.middleware, addProductApi.middleware,]),
-=======
-		getDefaultMiddleware().concat([
-			signUpApi.middleware,
-			signInApi.middleware,
-			securityApi.middleware,
-			storefrontApi.middleware,
-			profileApi.middleware,
-      transactionApi.middleware,
-		]),
->>>>>>> 5bed48ebeadf96324bd58a22e0c9991ce8a03868
+		getDefaultMiddleware().concat([signUpApi.middleware, signInApi.middleware, transactionApi.middleware, addProductApi.middleware, securityApi.middleware, storefrontApi.middleware, profileApi.middleware, ]),
 });
