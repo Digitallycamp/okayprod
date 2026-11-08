@@ -13,6 +13,7 @@ const rootReducer = combineReducers({
 	storefrontApi: storefrontApi.reducer,
 	profileApi: profileApi.reducer,
 	transactionApi: transactionApi.reducer,
+
 });
 
 export const store = configureStore({
@@ -24,6 +25,7 @@ export const store = configureStore({
 			securityApi.middleware,
 			storefrontApi.middleware,
 			profileApi.middleware,
-      transactionApi.middleware,
+            transactionApi.middleware,
+
 		]),
 });
