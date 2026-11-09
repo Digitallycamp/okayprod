@@ -5,6 +5,15 @@ import DashboardLayout from '../features/admin/DashboardLayout';
 import AuthLayout from '../features/auth/AuthLayout';
 import ProtectedRoutesGuard from './guard/ProtectedRoutesGuard';
 import RoleProtectedGuard from './guard/RoleProtectedGuard';
+import DashboardOverview from '../features/admin/dashboard';
+import { Link } from 'react-router';
+import AddNewProduct from '../features/admin/new-order';
+import DigitalProduct from '../features/admin/products/add-product/DigitalProduct.jsx'
+import SettingsProfilePage from '../features/admin/settings';
+import Transactions from '../features/admin/transactions'
+// const DashboardOverview = lazy(() =>
+// 	import('../features/admin/DashboardLayout')
+// );
 const ForgotPassword = lazy(() => import('../features/auth/forgot-password'));
 const Register = lazy(() => import('../features/auth/register'));
 const ResetPasword = lazy(() => import('../features/auth/reset-password'));
@@ -53,8 +62,15 @@ const routeObjects = [
 				errorElement: <p>NOT FOUND</p>,
 				element: withSuspense(<DashboardLayout />),
 				children: [
-					{ index: true, element: withSuspense(<DashboardOverview />) },
-					{ path: 'new-order', element: withSuspense(<AddNewProduct />) },
+					{ index: true, element: <DashboardOverview /> },
+					{
+						path: 'new-order',
+						element: <AddNewProduct />,
+					},
+					{
+						path: 'add-new-product',
+						element: <DigitalProduct />,
+					},
 					{ path: 'orders', element: <p>Orders</p> },
 					{ path: 'inventory', element: withSuspense(<Inventory />) },
 					{
