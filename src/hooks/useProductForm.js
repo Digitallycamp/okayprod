@@ -1,5 +1,4 @@
 import { useCallback, useState } from 'react';
-
 import { useCreateProductMutation } from '../features/admin/products/add-product/store/addProductApi';
 
 const initialProductForm = {
@@ -7,232 +6,153 @@ const initialProductForm = {
     name: '',
     description: '',
     price: '',
-    coverImage: null,
+    compareAtPrice: '',
+    galleryImages: [],
     digitalAsset: null,
     liveStorefrontPreview: false,
     publishStatus: true,
+    category: '',
+    sku: '',
+    barcode: '',
+    weight: '',
+    weightUnit: 'kg',
+    length: '',
+    width: '',
+    height: '',
+    shippingRateType: 'calculated',
 };
 
 const useProductForm = () => {
-    const [formData, setFormData] = useState(
-        initialProductForm
-    );
-
-    const [isSubmitting, setIsSubmitting] =
-        useState(false);
-
-    const [
-        createProduct,
-        { isLoading },
-    ] = useCreateProductMutation();
+    const [formData, setFormData] = useState(initialProductForm);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [createProduct] = useCreateProductMutation();
 
     const handleChange = useCallback((event) => {
-        const { name, value } = event.target;
-
+        const { name, value, type, checked } = event.target;
         setFormData((previous) => ({
             ...previous,
-            [name]: value,
+            [name]: type === 'checkbox' ? checked : value,
         }));
     }, []);
 
-    const handleProductTypeChange = useCallback(
-        (productType) => {
-            setFormData((previous) => ({
-                ...previous,
-                productType,
-            }));
-        },
-        []
-    );
+    const handleProductTypeChange = useCallback((productType) => {
+        setFormData((previous) => ({ ...previous, productType }));
+    }, []);
 
     const handleToggleChange = useCallback((event) => {
         const { name, checked } = event.target;
+        setFormData((previous) => ({ ...previous, [name]: checked }));
+    }, []);
 
+    const handleGalleryImagesChange = useCallback((files) => {
         setFormData((previous) => ({
             ...previous,
-            [name]: checked,
+            galleryImages: [...previous.galleryImages, ...files].slice(0, 5),
         }));
     }, []);
 
-    const handleCoverImageChange = useCallback(
-        (file) => {
-            setFormData((previous) => ({
-                ...previous,
-                coverImage: file,
-            }));
-        },
-        []
-    );
-
-    const handleDigitalAssetChange = useCallback(
-        (file) => {
-            setFormData((previous) => ({
-                ...previous,
-                digitalAsset: file,
-            }));
-        },
-        []
-    );
-
-    const handleRemoveCoverImage = useCallback(() => {
+    const handleRemoveGalleryImage = useCallback((indexToRemove) => {
         setFormData((previous) => ({
             ...previous,
-            coverImage: null,
+            galleryImages: previous.galleryImages.filter((_, index) => index !== indexToRemove),
         }));
+    }, []);
+
+    const handleDigitalAssetChange = useCallback((file) => {
+        setFormData((previous) => ({ ...previous, digitalAsset: file }));
     }, []);
 
     const handleRemoveDigitalAsset = useCallback(() => {
-        setFormData((previous) => ({
-            ...previous,
-            digitalAsset: null,
-        }));
+        setFormData((previous) => ({ ...previous, digitalAsset: null }));
     }, []);
 
     const resetForm = useCallback(() => {
         setFormData(initialProductForm);
     }, []);
 
-    
-    const buildFormData = useCallback(
-        (isPublished) => {
-            const data = new FormData();
+    const buildFormData = useCallback((isPublished) => {
+        const data = new FormData();
 
-            data.append(
-                'product_type',
-                formData.productType
-            );
+        data.append('product_type', formData.productType);
+        data.append('product_name', formData.name.trim());
+        data.append('product_description', formData.description.trim());
+        data.append('product_price', formData.price);
+        data.append('currency', 'NGN');
+        data.append('is_store_preview', String(formData.liveStorefrontPreview));
+        data.append('is_published', String(isPublished));
 
-            data.append(
-                'product_name',
-                formData.name.trim()
-            );
+        if (formData.compareAtPrice) {
+            data.append('compare_at_price', formData.compareAtPrice);
+        }
+        if (formData.category) {
+            data.append('category', formData.category);
+        }
 
-            data.append(
-                'product_description',
-                formData.description.trim()
-            );
+        formData.galleryImages.forEach((file) => {
+            data.append('cover_image', file);
+        });
 
-            data.append(
-                'product_price',
-                formData.price
-            );
+        if (formData.digitalAsset) {
+            data.append('digital_asset_file', formData.digitalAsset);
+        }
 
-            data.append(
-                'currency',
-                'NGN'
-            );
+        if (formData.productType === 'physical') {
+            data.append('sku', formData.sku);
+            data.append('barcode', formData.barcode || '');
+            data.append('weight', formData.weight);
+            data.append('weight_unit', formData.weightUnit);
+            data.append('dimensions_length', formData.length);
+            data.append('dimensions_width', formData.width);
+            data.append('dimensions_height', formData.height);
+            data.append('shipping_rate_type', formData.shippingRateType);
+        }
 
-            data.append(
-                'is_store_preview',
-                String(
-                    formData.liveStorefrontPreview
-                )
-            );
-
-            data.append(
-                'is_published',
-                String(isPublished)
-            );
-
-            if (formData.coverImage) {
-                data.append(
-                    'cover_image',
-                    formData.coverImage
-                );
-            }
-
-            if (formData.digitalAsset) {
-                data.append(
-                    'digital_asset_file',
-                    formData.digitalAsset
-                );
-            }
-
-            return data;
-        },
-        [formData]
-    );
+        return data;
+    }, [formData]);
 
     const handleSaveDraft = useCallback(async () => {
         setIsSubmitting('draft');
-
         const data = buildFormData(false);
-
         try {
-            const response =
-                await createProduct(data).unwrap();
-
-            console.log(
-                'Product saved as draft:',
-                response
-            );
-
+            const response = await createProduct(data).unwrap();
+            console.log('Product saved as draft:', response);
             return response;
         } catch (error) {
-            console.error(
-                'Failed to save product as draft:',
-                error
-            );
-
+            console.error('Failed to save product as draft:', error);
             throw error;
         } finally {
             setIsSubmitting(false);
         }
-    }, [
-        buildFormData,
-        createProduct,
-    ]);
+    }, [buildFormData, createProduct]);
 
     const handlePublish = useCallback(async () => {
         setIsSubmitting('publish');
-
         const data = buildFormData(true);
-
         try {
-            const response =
-                await createProduct(data).unwrap();
-
-            console.log(
-                'Product published:',
-                response
-            );
-
+            const response = await createProduct(data).unwrap();
+            console.log('Product published:', response);
             return response;
         } catch (error) {
-            console.error(
-                'Failed to publish product:',
-                error
-            );
-
+            console.error('Failed to publish product:', error);
             throw error;
         } finally {
             setIsSubmitting(false);
         }
-    }, [
-        buildFormData,
-        createProduct,
-    ]);
+    }, [buildFormData, createProduct]);
 
     return {
         formData,
         setFormData,
-
         isSubmitting,
-        isLoading,
-
         handleChange,
         handleProductTypeChange,
         handleToggleChange,
-
-        handleCoverImageChange,
+        handleGalleryImagesChange,
+        handleRemoveGalleryImage,
         handleDigitalAssetChange,
-
-        handleRemoveCoverImage,
         handleRemoveDigitalAsset,
-
         handleSaveDraft,
         handlePublish,
-
         resetForm,
         buildFormData,
     };
