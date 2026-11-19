@@ -5,12 +5,9 @@ import DashboardLayout from '../features/admin/DashboardLayout';
 import AuthLayout from '../features/auth/AuthLayout';
 import ProtectedRoutesGuard from './guard/ProtectedRoutesGuard';
 import RoleProtectedGuard from './guard/RoleProtectedGuard';
-import DashboardOverview from '../features/admin/dashboard';
-import { Link } from 'react-router';
-import AddNewProduct from '../features/admin/new-order';
 import DigitalProduct from '../features/admin/products/add-product/DigitalProduct.jsx'
+const PhysicalProduct = lazy(() => import('../features/admin/products/add-product/PhysicalProduct'));
 import SettingsProfilePage from '../features/admin/settings';
-import Transactions from '../features/admin/transactions'
 // const DashboardOverview = lazy(() =>
 // 	import('../features/admin/DashboardLayout')
 // );
@@ -71,6 +68,10 @@ const routeObjects = [
 						path: 'add-new-product',
 						element: <DigitalProduct />,
 					},
+					{
+                        path: 'add-new-product/physical',
+                        element: <PhysicalProduct />,
+                    },
 					{ path: 'orders', element: <p>Orders</p> },
 					{ path: 'inventory', element: withSuspense(<Inventory />) },
 					{

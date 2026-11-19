@@ -1,5 +1,6 @@
 import { Box, Button, Flex, Input, Text } from '@chakra-ui/react';
-
+import React, { useState, useEffect } from 'react';
+import { ImagePlus, FileUp, Upload, X } from 'lucide-react';
 const MediaAssets = ({
     values, onCoverImageChange, onDigitalAssetChange, onRemoveCoverImage, onRemoveDigitalAsset,
 }) => {
