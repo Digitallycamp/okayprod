@@ -8,6 +8,9 @@ export const addProductApi = createApi({
     credentials: 'include',
   }),
 
+  // 1. Add tagTypes
+  tagTypes: ['Product'],
+
   endpoints: (build) => ({
     createProduct: build.mutation({
       query: (formData) => ({
@@ -15,10 +18,22 @@ export const addProductApi = createApi({
         method: 'POST',
         body: formData,
       }),
+      // 2. Invalidate cache so the inventory list refetches automatically
+      invalidatesTags: ['Product'],
+    }),
+
+    // 3. Add the getProducts query
+    getProducts: build.query({
+      query: () => ({
+        url: '/products',
+        method: 'GET',
+      }),
+      providesTags: ['Product'],
     }),
   }),
 });
 
 export const {
   useCreateProductMutation,
+  useGetProductsQuery, // 4. Export the new hook
 } = addProductApi;
