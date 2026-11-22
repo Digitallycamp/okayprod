@@ -1,36 +1,68 @@
 import { useState, useMemo } from 'react';
-import {Box,Flex,HStack,Button,Input,InputGroup,InputLeftElement,Grid,useBreakpointValue,Text,} from '@chakra-ui/react';
+import { Box, Flex, HStack, Button, Input, InputGroup, InputLeftElement, Grid, Text, Spinner, Center } from '@chakra-ui/react';
 import { useNavigate } from 'react-router';
 import { Download, Plus, Search, SlidersHorizontal } from 'lucide-react';
 import PageHeader from './components/pageHeader';
 import ProductCard from './components/product-card/productCard';
-import { inventoryProducts,getTypeCounts } from '../../../utils/inventoryData';
+import { useGetProductsQuery } from '../products/add-product/store/addProductApi';
 
 const Inventory = () => {
   const navigate = useNavigate();
-  const isMobile = useBreakpointValue({ base: true, md: false });
   const [activeType, setActiveType] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [visibleCount, setVisibleCount] = useState(4);
-  const counts = useMemo(() => getTypeCounts(inventoryProducts), []);
+
+  // Fetch from backend
+  const { data: productRes, isLoading } = useGetProductsQuery();
+  
+  // Map backend data to frontend shape
+  const products = useMemo(() => {
+    if (!productRes?.data) return [];
+    
+    return productRes.data.map((p) => ({
+      id: p._id,
+      title: p.product_name,
+      price: `$${p.product_price}`, // Add currency formatting if needed
+      type: p.product_type,
+      status: p.is_published ? 'Available' : 'Draft',
+      statusColor: p.is_published ? 'green' : 'gray',
+      description: p.product_description,
+      image: p.cover_image?.[0]?.url || 'https://placehold.co/400x300?text=No+Image',
+      footer: {
+        icon: 'Package', // You might want to compute this based on type
+        label: '0 Sales', // Backend doesn't have sales count yet
+        trend: '+0%'
+      }
+    }));
+  }, [productRes]);
+
+  // Calculate counts dynamically
+  const counts = useMemo(() => {
+    return {
+      all: products.length,
+      digital: products.filter(p => p.type === 'digital').length,
+      physical: products.filter(p => p.type === 'physical').length,
+      service: products.filter(p => p.type === 'service').length,
+    };
+  }, [products]);
+
   const filteredProducts = useMemo(() => {
-    return inventoryProducts.filter((product) => {
+    return products.filter((product) => {
       const matchesType = activeType === 'all' || product.type === activeType;
-      const matchesSearch = product.title
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-        product.description
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase());
+      const matchesSearch = 
+        product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchTerm.toLowerCase());
       
       return matchesType && matchesSearch;
     });
-  }, [activeType, searchTerm]);
+  }, [products, activeType, searchTerm]);
+
   const visibleProducts = useMemo(() => {
     return filteredProducts.slice(0, visibleCount);
   }, [filteredProducts, visibleCount]);
 
   const hasMore = visibleCount < filteredProducts.length;
+
   const handleLoadMore = () => {
     setVisibleCount(prev => Math.min(prev + 4, filteredProducts.length));
   };
@@ -63,14 +95,23 @@ const Inventory = () => {
   };
 
   const handleAddProduct = () => {
-    navigate('/dashboard/new-order');
+    navigate('/dashboard/add-new-product'); // or wherever your new-order route is
   };
+
   const tabs = [
     { id: 'all', label: 'All Products', count: counts.all },
     { id: 'digital', label: 'Digital', count: counts.digital },
     { id: 'physical', label: 'Physical', count: counts.physical },
     { id: 'service', label: 'Services', count: counts.service },
   ];
+
+  if (isLoading) {
+    return (
+      <Center minH="calc(100vh - 80px)">
+        <Spinner color="#9A4600" size="lg" />
+      </Center>
+    );
+  }
 
   return (
     <Box bg="#F7FAFE" minH="calc(100vh - 80px)" p={{ base: 4, md: 6, lg: 8 }}>
@@ -85,7 +126,7 @@ const Inventory = () => {
         onPrimaryClick={handleAddProduct} 
         mb="8"
       />
-      <Box  bg="white"  borderRadius="xl"  p={{ base: 4, md: 5 }}  mb={8}  border="1px solid"  borderColor="#E5EBF2"  boxShadow="sm">
+      <Box bg="white" borderRadius="xl" p={{ base: 4, md: 5 }} mb={8} border="1px solid" borderColor="#E5EBF2" boxShadow="sm">
         <Flex
           direction={{ base: 'column', lg: 'row' }}
           gap={4}
@@ -94,19 +135,14 @@ const Inventory = () => {
         >
           <HStack spacing={2} overflowX={{ base: 'auto', lg: 'visible' }} pb={{ base: 2, lg: 0 }}
             css={{
-              '&::-webkit-scrollbar': {
-                height: '4px',
-              },
-              '&::-webkit-scrollbar-thumb': {
-                background: '#D1D9E6',
-                borderRadius: 'full',
-              },
+              '&::-webkit-scrollbar': { height: '4px' },
+              '&::-webkit-scrollbar-thumb': { background: '#D1D9E6', borderRadius: 'full' },
             }}
           >
             {tabs.map((tab) => {
               const isActive = activeType === tab.id;
               return (
-                <Button  key={tab.id}  size="sm"  px={4}  py={2.5}  h="auto"  borderRadius="full"  bg={isActive ? '#FFDBC9' : '#EBEEF2'}  color={isActive ? '#9A4600' : '#564238'}  fontWeight={isActive ? '600' : '500'}  _hover={{    bg: isActive ? '#FFDBC9' : '#D1D9E6',  }}  _active={{    bg: '#FFDBC9',  }}  onClick={() => {    setActiveType(tab.id);    setVisibleCount(4);  }}  whiteSpace="nowrap">
+                <Button  key={tab.id}  size="sm"  px={4}  py={2.5}  h="auto"  borderRadius="full"  bg={isActive ? '#FFDBC9' : '#EBEEF2'}  color={isActive ? '#9A4600' : '#564238'}  fontWeight={isActive ? '600' : '500'}  _hover={{ bg: isActive ? '#FFDBC9' : '#D1D9E6' }}  _active={{ bg: '#FFDBC9' }}  onClick={() => { setActiveType(tab.id); setVisibleCount(4); }}  whiteSpace="nowrap">
                   {tab.label}
                   <Box  as="span"  ml={2}  bg={isActive ? '#9A4600' : '#D1D9E6'}  color={isActive ? 'white' : '#564238'}  px={2}  py={0.5}  borderRadius="full"  fontSize="xs"  fontWeight="600">
                     {tab.count}
@@ -120,36 +156,23 @@ const Inventory = () => {
               <InputLeftElement pointerEvents="none">
                 <Search size={18} color="#564238" />
               </InputLeftElement>
-              <Input  placeholder="Search inventory..."  value={searchTerm}  
-               onChange={(e) => { 
-                setSearchTerm(e.target.value);    
-                setVisibleCount(4);  
-                }}  
-               bg="#F7FAFE"  border="1px solid"  
-               borderColor="#E5EBF2"  borderRadius="lg"  h="44px"  pl={10}  fontSize="sm"  
-               _focus={{ 
-                borderColor: '#9A4600',    
-                boxShadow: '0 0 0 1px #9A4600',   
-                 bg: 'white',  }}/>
+              <Input  placeholder="Search inventory..."  value={searchTerm}  onChange={(e) => { setSearchTerm(e.target.value); setVisibleCount(4); }} bg="#F7FAFE"  border="1px solid"  borderColor="#E5EBF2"  borderRadius="lg"  h="44px"  pl={10}  fontSize="sm"  _focus={{ borderColor: '#9A4600', boxShadow: '0 0 0 1px #9A4600', bg: 'white' }}/>
             </InputGroup>
             <Button  variant="outline"  borderColor="#E5EBF2"  bg="white"  h="44px"  w="44px"  minW="44px"  borderRadius="lg"
-              _hover={{
-                bg: '#F7FAFE',
-                borderColor: '#D1D9E6',
-              }}
+              _hover={{ bg: '#F7FAFE', borderColor: '#D1D9E6' }}
             >
               <SlidersHorizontal size={18} color="#564238" />
             </Button>
           </HStack>
         </Flex>
       </Box>
-      <Grid
-        templateColumns={{  base: '1fr',  sm: 'repeat(2, 1fr)',  lg: 'repeat(3, 1fr)',  xl: 'repeat(4, 1fr)',}}
-        gap={6} mb={8} >
+      
+      <Grid templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)', xl: 'repeat(4, 1fr)'}} gap={6} mb={8} >
         {visibleProducts.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </Grid>
+
       {filteredProducts.length === 0 && (
         <Box textAlign="center" py={12}>
           <Text color="#564238" fontSize="lg">
@@ -157,17 +180,11 @@ const Inventory = () => {
           </Text>
         </Box>
       )}
+
       {filteredProducts.length > 0 && (
         <Flex justify="center" mt={4}>
           {hasMore ? (
-            <Button  variant="outline"  borderColor="#D1D9E6"  color="#564238"  bg="white"  px={8}  py={6}  borderRadius="full"  fontWeight="500"
-              _hover={{
-                bg: '#F7FAFE',
-                borderColor: '#9A4600',
-                color: '#9A4600',
-              }}
-              onClick={handleLoadMore}
-            >
+            <Button  variant="outline"  borderColor="#D1D9E6"  color="#564238"  bg="white"  px={8}  py={6}  borderRadius="full"  fontWeight="500" _hover={{ bg: '#F7FAFE', borderColor: '#9A4600', color: '#9A4600' }} onClick={handleLoadMore}>
               Load More
             </Button>
           ) : (
